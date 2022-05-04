@@ -18,16 +18,21 @@ public class TweetTime {
 	    private final static IntWritable one = new IntWritable(1);
 	    private Text word = new Text();
 
-	    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-	    	// owncode
-		    String line = value.toString();
-			if (line.length() > 0) {
-				if (line.charAt(0) == 'T') {
-				    word.set(line.substring(line.indexOf(':')-2, line.indexOf(':')));
-				    context.write(word, one);
-				}	
-			}	
-    	}
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            StringTokenizer line = new StringTokenizer(value.toString());
+            while (line.hasMoreTokens()) {
+				// if time line, take info
+                if (line.nextToken().equals("T")) {
+                    line.nextToken();
+					StringTokenizer time = new StringTokenizer(line.nextToken(), ":");
+                    word.set(time.nextToken());
+                    context.write(word, one);
+                } 
+				// otherwise, ignore
+				// always need to move to next line
+                line.nextToken();
+            }
+        }
 	}
 
 	public static class IntSumReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
